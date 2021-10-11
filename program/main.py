@@ -11,7 +11,9 @@ from collections import deque
 
 randImg = randint(1, 50)
 img = cv2.imread(f"./images/{randImg}.jpg")
-cv2.imshow("test", img)
+#img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+cv2.imshow("Original Image", img)
 roi_list = []
 
 
@@ -38,22 +40,23 @@ def splitImage(image):
         currentY += img.shape[0] // 5
     return roi_list
 
+# masks the center 3/5ths of a list of tiles (ignores houses and such within the image
 def mask_roi_list(img_list):
     masked_roi_list = deque([])     # output array list
 
     for i in range(len(img_list)):  # loops through input image list
         currentImg = img_list[i]    # Extracts the current Roi
-        H = currentImg.shape[0]     # Set width and height as varriables to reduce the length of subsequent lines
+        H = currentImg.shape[0]     # Set width and height as variables to reduce the length of subsequent lines
         W = currentImg.shape[1]
 
         mask = np.zeros(currentImg.shape[:2], dtype="uint8")        # Sets up blank mask
-        cv2.rectangle(mask, (0, 0), (W, H), 255, -1)                # Incluedes entire frame into mask
-        cv2.rectangle(mask, (W//5, H//5), (W-(W//5), H-(H//5)), 0, -1)  # Exludes the center 3/5 of the image
+        cv2.rectangle(mask, (0, 0), (W, H), 255, -1)                # Includes entire frame into mask
+        cv2.rectangle(mask, (W//5, H//5), (W-(W//5), H-(H//5)), 0, -1)  # Excludes the center 3/5 of the image
 
         masked = cv2.bitwise_and(currentImg, currentImg, mask=mask) # Applies mask to current layer
         masked_roi_list.append(masked)   # Appends the masked image to the output list
-
-        ''' # Displays the Masked Image, The Current region of intrest and the, mask
+        '''
+        # Displays the Masked Image, The Current region of intrest and the, mask
         cv2.imshow(f"Mask Applied{i}", masked)
         cv2.imshow(f"Current Regoin of Intrest{i}", currentImg)
         cv2.imshow(f"Mask to apply{i}", mask)
@@ -61,11 +64,8 @@ def mask_roi_list(img_list):
 
     return masked_roi_list  # Returns a list of masked ROIs
 
-
-
-
-
-
+def adverage_img_color(img_list):
+    pass
 
 tile_list = splitImage(img)
 output = mask_roi_list(tile_list)
