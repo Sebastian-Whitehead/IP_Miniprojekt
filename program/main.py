@@ -3,25 +3,17 @@ import numpy as np
 from random import *
 from collections import deque
 
-#TODO: nested for loops for splitting image
-#TODO: Masking to cover center of image
 #TODO: Adverage colour / blur image
 #TODO: Thresholding to identify tile type
 #TODO: Crown Identification
 
 randImg = randint(1, 50)
-img = cv2.imread(f"./images/{randImg}.jpg")
+#img = cv2.imread(f"./images/{randImg}.jpg")
+img = cv2.imread("./images/1.jpg")
 #img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
 cv2.imshow("Original Image", img)
 roi_list = []
-
-
-'''processedImg = [[1, 2, 3, 4, 5],
-                [1, 2, 3, 4, 5],
-                [1, 2, 3, 4, 5],
-                [1, 2, 3, 4, 5],
-                [1, 2, 3, 4, 5]]'''
 
 # splits image into individual tiles in a 5x5 grid
 def splitImage(image):
@@ -40,7 +32,7 @@ def splitImage(image):
         currentY += img.shape[0] // 5
     return roi_list
 
-# masks the center 3/5ths of a list of tiles (ignores houses and such within the image
+# masks the center 3/5ths of a list of tiles (ignores houses and such within the image)
 def mask_roi_list(img_list):
     masked_roi_list = deque([])     # output array list
 
@@ -64,9 +56,62 @@ def mask_roi_list(img_list):
 
     return masked_roi_list  # Returns a list of masked ROIs
 
-def adverage_img_color(img_list):
-    pass
+# Averages the colors of the individual tiles
+def average_img_color(img_list, input_img):
+    assembled_tiles = input_img.copy()
+    currentX = 0
+    currentY = 0
+
+    for i in range(len(img_list)): # Loop through each individual tile image in img_list
+
+        # Create empty numpy arrays for all unmasked B G R values in an image.
+        B = np.array([])
+        G = np.array([])
+        R = np.array([])
+
+        # CurrentImg = cv2.cvtColor(img_list[i], cv2.COLOR_BGR2HSV)
+        currentImg = img_list[i]
+
+        # Loop through all the pixels within the current tile image
+        for y, row in enumerate(currentImg):
+            for x, pixel in enumerate(row):
+
+                if not pixel[0] == 0: #If the B pixel value is not 0 (only occurs when pixel is masked)
+
+                    # Append B G R values to corresponding list
+                    B = np.append(B, pixel[0])
+                    G = np.append(G, pixel[1])
+                    R = np.append(R, pixel[2])
+
+        # Average and round values of the B G R numpy arrays.
+        B = round(np.average(B))
+        G = round(np.average(G))
+        R = round(np.average(R))
+        #print(f"tile - {i} = [{B}, {G}, {R}]")
+
+        # Assembles the array of averaged tiles into a singlar mosaic image.
+        if currentX == input_img.shape[1]:
+            currentY += input_img.shape[0]//5
+            currentX = 0
+        #print(f"{currentX} - {currentY}\n")
+
+        cv2.rectangle(assembled_tiles, (currentX, currentY), (currentX + input_img.shape[1]//5, currentY + input_img.shape[0]//5), (B, G, R), -1)
+        currentX += input_img.shape[1]//5
+
+    cv2.imshow("test", assembled_tiles)
+    return assembled_tiles
+
+# WIP
+def threshold_mosaic():
+    # Blank matrix for output after thresholding of the mosaic
+    ID_Img = [[0, 0, 0, 0, 0],
+              [0, 0, 0, 0, 0],
+              [0, 0, 0, 0, 0],
+              [0, 0, 0, 0, 0],
+              [0, 0, 0, 0, 0]]
+
 
 tile_list = splitImage(img)
-output = mask_roi_list(tile_list)
+masked_tiles = mask_roi_list(tile_list)
+assembled_Mosaic = average_img_color(masked_tiles, img)
 cv2.waitKey(0)
