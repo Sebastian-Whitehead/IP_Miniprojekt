@@ -48,12 +48,12 @@ def mask_roi_list(img_list):
 
         masked = cv2.bitwise_and(currentImg, currentImg, mask=mask) # Applies mask to current layer
         masked_roi_list.append(masked)   # Appends the masked image to the output list
-        '''
+    '''
         # Displays the Masked Image, The Current region of intrest and the, mask
         cv2.imshow(f"Mask Applied{i}", masked)
         cv2.imshow(f"Current Regoin of Intrest{i}", currentImg)
         cv2.imshow(f"Mask to apply{i}", mask)
-        '''
+    '''
 
     return masked_roi_list  # Returns a list of masked ROIs
 
@@ -156,8 +156,8 @@ def threshold_mosaic(Input_mosaic):
     print(ID_Img)
 
 
-# ----------------------------------------------------------------------------------------------- #
 
+# ----------------------------------------------------------------------------------------------- #
 tile_list = splitImage(img)
 masked_tiles = mask_roi_list(tile_list)
 assembled_Mosaic = average_img_color(masked_tiles, img)
