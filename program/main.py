@@ -3,13 +3,14 @@ import numpy as np
 from random import *
 from collections import deque
 
-#TODO: Adverage colour / blur image
-#TODO: Thresholding to identify tile type
-#TODO: Crown Identification
+#TODO: Grassfire to identify groups
+#TODO: Crown Identification - Alex
+#TODO: README.MD
+#TODO: Short Report
 
 randImg = randint(1, 50)
-#img = cv2.imread(f"./images/{randImg}.jpg")
-img = cv2.imread("./images/1.jpg")
+img = cv2.imread(f"./images/{randImg}.jpg")
+print(f"./images/{randImg}.jpg")
 #img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
 cv2.imshow("Original Image", img)
@@ -56,7 +57,7 @@ def mask_roi_list(img_list):
 
     return masked_roi_list  # Returns a list of masked ROIs
 
-# Averages the colors of the individual tiles
+# Averages the colors of the individual tiles and assembles them into a mosaic
 def average_img_color(img_list, input_img):
     assembled_tiles = input_img.copy()
     currentX = 0
@@ -69,7 +70,6 @@ def average_img_color(img_list, input_img):
         G = np.array([])
         R = np.array([])
 
-        # CurrentImg = cv2.cvtColor(img_list[i], cv2.COLOR_BGR2HSV)
         currentImg = img_list[i]
 
         # Loop through all the pixels within the current tile image
@@ -98,20 +98,68 @@ def average_img_color(img_list, input_img):
         cv2.rectangle(assembled_tiles, (currentX, currentY), (currentX + input_img.shape[1]//5, currentY + input_img.shape[0]//5), (B, G, R), -1)
         currentX += input_img.shape[1]//5
 
-    cv2.imshow("test", assembled_tiles)
+    cv2.imshow("Mosaic", assembled_tiles)
     return assembled_tiles
 
-# WIP
-def threshold_mosaic():
-    # Blank matrix for output after thresholding of the mosaic
-    ID_Img = [[0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0],
-              [0, 0, 0, 0, 0]]
+# HSV thresholding of the assembled mosaic
+def threshold_mosaic(Input_mosaic):
+    Input_mosaic = cv2.cvtColor(Input_mosaic, cv2.COLOR_BGR2HSV)
+    #cv2.imshow("Mosaic_HSV", Input_mosaic)
 
+    # Blank matrix for output after thresholding of the mosaic
+    ID_Img = np.zeros((5, 5), dtype="uint8")
+    # 0 = Unknown
+    # 1 = Grass
+    # 2 = Ocean
+    # 3 = Field
+    # 4 = Forest
+    # 5 = Swamp
+    # 6 = Mine
+
+    x_offset = 50
+    y_offset = 50
+
+    for y, row in enumerate(ID_Img):
+        for x, entry in enumerate(row):
+            test_Value = Input_mosaic[y_offset + y * (Input_mosaic.shape[0]//5), x_offset + x * (Input_mosaic.shape[1]//5)]
+            H = test_Value[0]
+            S = test_Value[1]
+            V = test_Value[2]
+            #print(f"{x},{y} - {test_Value}")
+
+            if (36 <= H <= 47) and (135 <= S <= 235) and (90 <= V <= 160): # Grass
+                ID_Img[y, x] = 1
+
+            elif (103 <= H <= 110) and (110 <= S <= 260) and (100 <= V <= 195): # Water
+                ID_Img[y, x] = 2
+
+            elif (23 <= H <= 28) and (190 <= S <= 250) and (85 <= V <= 205): # Field
+                ID_Img[y, x] = 3
+
+            elif (30 <= H <= 88) and (60 <= S <= 220) and (40 <= V <= 90): # Forest
+                ID_Img[y, x] = 4
+
+            elif (19 <= H <= 28) and (50 <= S <= 165) and (70 <= V <= 140): # Swamp
+                ID_Img[y, x] = 5
+
+            elif (20 <= H <= 32) and (10 <= S <= 165) and (30 <= V <= 65): # Mine
+                ID_Img[y, x] = 6
+
+            #if ID_Img[y, x] == 0:
+            #    print(f" Tile [{x}, {y}] : [{H}, {S}, {V}]")
+
+#TODO: ERROR -
+# Image 24, 27, 31 Invalid tile within thresholds
+# Image 25, 29 not square
+# Image 14 Large Castle Overlap
+
+    print(ID_Img)
+
+
+# ----------------------------------------------------------------------------------------------- #
 
 tile_list = splitImage(img)
 masked_tiles = mask_roi_list(tile_list)
 assembled_Mosaic = average_img_color(masked_tiles, img)
+threshold_mosaic(assembled_Mosaic)
 cv2.waitKey(0)
