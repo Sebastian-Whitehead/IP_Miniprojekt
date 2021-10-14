@@ -8,30 +8,30 @@ from collections import deque
 #TODO: README.MD
 #TODO: Short Report
 
+# Choose a random picture from the test set and load the selected image
 randImg = randint(1, 50)
 img = cv2.imread(f"./images/{randImg}.jpg")
 print(f"./images/{randImg}.jpg")
-#img_hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
+# Show the original image before processing
 cv2.imshow("Original Image", img)
-roi_list = []
 
 # splits image into individual tiles in a 5x5 grid
 def splitImage(image):
-    currentX = 0
+    currentX = 0 # Current X & Y wiithin the image
     currentY = 0
-    roi_list = deque([])
-    i = 0
-    for y in range(5):
-        currentX = 0
-        for x in range(5):
-            currentROI = image[currentY:(image.shape[0] // 5) + currentY, currentX:(image.shape[1] // 5) + currentX]
-            roi_list.append(currentROI)
+
+    roi_list = deque([])    # Initialize the output array
+
+    for y in range(5):      # Loop through rows.
+        currentX = 0        # Reset X position every time the program switches rows
+        for x in range(5):  # Loop through columns
+            currentROI = image[currentY:(image.shape[0] // 5) + currentY, currentX:(image.shape[1] // 5) + currentX] # Crop out 1/25th of the original image.
+            roi_list.append(currentROI)     # Append the cropped tile to a the output list
             #cv2.imshow(f"test{i}", currentROI)
-            i += 1
-            currentX += img.shape[1] // 5
-        currentY += img.shape[0] // 5
-    return roi_list
+            currentX += img.shape[1] // 5   # Shift the column section to crop
+        currentY += img.shape[0] // 5       # Shift the row section to crop
+    return roi_list # Return the ROI list
 
 # masks the center 3/5ths of a list of tiles (ignores houses and such within the image)
 def mask_roi_list(img_list):
@@ -95,6 +95,7 @@ def average_img_color(img_list, input_img):
             currentX = 0
         #print(f"{currentX} - {currentY}\n")
 
+        # Draw a rectangle matching the size of the tile onto a blank image
         cv2.rectangle(assembled_tiles, (currentX, currentY), (currentX + input_img.shape[1]//5, currentY + input_img.shape[0]//5), (B, G, R), -1)
         currentX += input_img.shape[1]//5
 
@@ -116,17 +117,19 @@ def threshold_mosaic(Input_mosaic):
     # 5 = Swamp
     # 6 = Mine
 
+    # x and y offset so loop samples center of images
     x_offset = 50
     y_offset = 50
 
     for y, row in enumerate(ID_Img):
         for x, entry in enumerate(row):
-            test_Value = Input_mosaic[y_offset + y * (Input_mosaic.shape[0]//5), x_offset + x * (Input_mosaic.shape[1]//5)]
-            H = test_Value[0]
+            test_Value = Input_mosaic[y_offset + y * (Input_mosaic.shape[0]//5), x_offset + x * (Input_mosaic.shape[1]//5)] #sample the cetner of each tile
+            H = test_Value[0]   # Extract the HSV values individually
             S = test_Value[1]
             V = test_Value[2]
             #print(f"{x},{y} - {test_Value}")
 
+            # threshold the obtained HSV value and id the tile in the output array.
             if (36 <= H <= 47) and (135 <= S <= 235) and (90 <= V <= 160): # Grass
                 ID_Img[y, x] = 1
 
