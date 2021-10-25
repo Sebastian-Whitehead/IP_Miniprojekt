@@ -3,10 +3,11 @@ import numpy as np
 from random import *
 from collections import deque
 
-#TODO: Grassfire to identify groups
 #TODO: Crown Identification - Alex
 #TODO: README.MD
 #TODO: Short Report
+
+next_id = 10
 
 # Choose a random picture from the test set and load the selected image
 randImg = randint(1, 50)
@@ -157,12 +158,82 @@ def threshold_mosaic(Input_mosaic):
 # Image 14 Large Castle Overlap
 
     print(ID_Img)
+    return(ID_Img)
+
+#Grouping the ID'ed mosaic
+def ignite_fire(mosaic, coordinates, current_id, target_tile):
+    # Create burn_queue deque to keep track of positions to burn
+    burn_queue = deque([])
+    something_burned = False
+
+    # If object pixel, add starting point to deque
+    if mosaic[coordinates[0], coordinates[1]] == target_tile:
+        burn_queue.append(coordinates)
+        something_burned = True
+
+    while len(burn_queue) > 0:
+        current_pos = burn_queue.pop()
+        y, x = current_pos
+        # Burn current_pos with current id
+        mosaic[y, x] = current_id
+        # Add connections to burn_queue
+        if y - 1 >= 0 and mosaic[y - 1, x] == target_tile:
+            burn_queue.append((y - 1, x))
+        if x - 1 >= 0 and mosaic[y, x - 1] == target_tile:
+            burn_queue.append((y, x - 1))
+        if y + 1 < mosaic.shape[0] and mosaic[y + 1, x] == target_tile:
+            burn_queue.append((y + 1, x))
+        if x + 1 < mosaic.shape[1] and mosaic[y, x + 1] == target_tile:
+            burn_queue.append((y, x + 1))
+
+    if something_burned:
+        current_id += 1
+
+    return current_id, mosaic
+
+def detect_crowns():
+    img_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    crown_list = deque([])
+    last_pt = (0, 0)
+
+    temp = cv2.imread('crownTemplate.jpg', 0)
+    crown_list, last_pt = templateing(crown_list, img_grey, temp, last_pt)
+    temp = cv2.imread('fieldCrownTest.jpg', 0)
+    crown_list, last_pt = templateing(crown_list, img_grey, temp, last_pt)
+    print(crown_list)
+    return crown_list
+
+def templateing(crowns, source, template, last):
+    for i in range(4):
+        template = cv2.rotate(template, cv2.ROTATE_90_CLOCKWISE)
+        #cv2.imshow(f"test{i}", temp)
+        w, h = template.shape[::-1]
+        res = cv2.matchTemplate(source, template, cv2.TM_CCOEFF_NORMED)
+        threshold = 0.7
+        loc = np.where(res >= threshold)
+        for pt in zip(*loc[::-1]):
+            if (abs(pt[0]-last[0]) > 10) or (abs(pt[1]-last[1]) > 10):
+                cv2.rectangle(source, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), -1)
+                crowns.append(pt)
+                last = pt
+    cv2.imwrite('res.jpg', source)
+    return crowns, last
 
 
 
 # ----------------------------------------------------------------------------------------------- #
-tile_list = splitImage(img)
-masked_tiles = mask_roi_list(tile_list)
-assembled_Mosaic = average_img_color(masked_tiles, img)
-threshold_mosaic(assembled_Mosaic)
+#tile_list = splitImage(img)
+#masked_tiles = mask_roi_list(tile_list)
+#assembled_Mosaic = average_img_color(masked_tiles, img)
+#ID_mosaic = threshold_mosaic(assembled_Mosaic)
+
+
+#for i in range(6):
+#    for y, row in enumerate(ID_mosaic):
+#        for x, pixel in enumerate(row):
+            # For each pixel call ignite_fire(…)
+#            next_id, ID_mosaic = ignite_fire(ID_mosaic, (y, x), next_id, i+1)
+#print(ID_mosaic)
+detect_crowns()
+
 cv2.waitKey(0)
