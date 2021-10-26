@@ -11,7 +11,7 @@ next_id = 10
 
 # Choose a random picture from the test set and load the selected image
 randImg = randint(1, 50)
-img = cv2.imread(f"./images/{randImg}.jpg")
+img = cv2.imread(f"./images/9.jpg")
 print(f"Random image to process = ./images/{randImg}.jpg")
 
 # Show the original image before processing
@@ -210,11 +210,11 @@ def detect_crowns():
 
     # template match using the standard crown template
     temp = cv2.imread('crownTemplate.jpg', 0)
-    crown_list = template_search(crown_list, img_grey, temp, 0.74)
+    crown_list = template_search(crown_list, img_grey, temp, 0.71)
 
     # template match using the field crown template (fix because it didn't work with the other one for some reason)
     temp = cv2.imread('fieldCrownTest.jpg', 0)
-    crown_list = template_search(crown_list, img_grey, temp, 0.67)
+    crown_list = template_search(crown_list, img_grey, temp, 0.69)
 
     # Assign the according to location to a matrix of similar size and shape as the ID mosaic
     crown_matrix = np.zeros((5, 5), dtype="uint8")
@@ -244,7 +244,7 @@ def template_search(crowns, source, template, threshold):
         for pt in zip(*loc[::-1]):
             for [x, y] in crowns:
                 check = False
-                if (math.isclose(x, pt[0], abs_tol=5)) and (math.isclose(y, pt[1], abs_tol=5)):
+                if (math.isclose(x, pt[0], abs_tol=10)) and (math.isclose(y, pt[1], abs_tol=10)):
                     check = True
                     # print(f"{pt} - ({x}, {y}) >>>>> {abs(x - pt[0])} - {abs(y - pt[1])} -- TOO CLOSE")
                     break
