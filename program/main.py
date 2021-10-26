@@ -11,7 +11,7 @@ next_id = 10
 
 # Choose a random picture from the test set and load the selected image
 randImg = randint(1, 50)
-img = cv2.imread(f"./images/9.jpg")
+img = cv2.imread(f"./images/{randImg}.jpg")
 print(f"Random image to process = ./images/{randImg}.jpg")
 
 # Show the original image before processing
