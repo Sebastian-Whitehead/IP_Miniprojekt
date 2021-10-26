@@ -7,7 +7,7 @@ import math
 # TODO: README.MD
 # TODO: Short Report
 
-next_id = 10
+next_id = 10 # Next id variable for grassfire() function
 
 # Choose a random picture from the test set and load the selected image
 randImg = randint(1, 50)
@@ -294,6 +294,7 @@ tile_list = split_image(img)
 masked_tiles = mask_roi_list(tile_list)
 assembled_Mosaic = average_img_color(masked_tiles, img)
 ID_mosaic = threshold_mosaic(assembled_Mosaic)
+
 print("-----------------------------------------------------")
 
 for i in range(6):
@@ -302,10 +303,13 @@ for i in range(6):
             # For each pixel call ignite_fire(…)
             next_id, ID_mosaic = ignite_fire(ID_mosaic, (y, x), next_id, i + 1)
 print(f"\n🔥 Grouped Mosaic =\n{ID_mosaic}")
+
 print("-----------------------------------------------------")
+
 Crown_mosaic = detect_crowns()
 
 print("-----------------------------------------------------")
+
 calculate_score(ID_mosaic, Crown_mosaic)
 
 cv2.waitKey(0)
