@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from random import *
 from collections import deque
+import math
 
 #TODO: Crown Identification - Alex
 #TODO: README.MD
@@ -11,8 +12,8 @@ next_id = 10
 
 # Choose a random picture from the test set and load the selected image
 randImg = randint(1, 50)
-img = cv2.imread(f"./images/{randImg}.jpg")
-print(f"./images/{randImg}.jpg")
+img = cv2.imread(f"./images/6.jpg")
+#print(f"./images/{randImg}.jpg")
 
 # Show the original image before processing
 cv2.imshow("Original Image", img)
@@ -193,31 +194,45 @@ def ignite_fire(mosaic, coordinates, current_id, target_tile):
 
 def detect_crowns():
     img_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    crown_list = deque([])
+    crown_list = []
     last_pt = (0, 0)
 
     temp = cv2.imread('crownTemplate.jpg', 0)
-    crown_list, last_pt = templateing(crown_list, img_grey, temp, last_pt)
+    crown_list = templateing(crown_list, img_grey, temp)
     temp = cv2.imread('fieldCrownTest.jpg', 0)
-    crown_list, last_pt = templateing(crown_list, img_grey, temp, last_pt)
+    crown_list = templateing(crown_list, img_grey, temp)
     print(crown_list)
+    print(len(crown_list))
     return crown_list
 
-def templateing(crowns, source, template, last):
+def templateing(crowns, source, template):
     for i in range(4):
         template = cv2.rotate(template, cv2.ROTATE_90_CLOCKWISE)
         #cv2.imshow(f"test{i}", temp)
         w, h = template.shape[::-1]
         res = cv2.matchTemplate(source, template, cv2.TM_CCOEFF_NORMED)
-        threshold = 0.7
+        threshold = 0.75
         loc = np.where(res >= threshold)
+        check = False
         for pt in zip(*loc[::-1]):
-            if (abs(pt[0]-last[0]) > 10) or (abs(pt[1]-last[1]) > 10):
-                cv2.rectangle(source, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), -1)
+            print("\n")
+
+            for [x, y] in crowns:
+                check = False
+                if (math.isclose(x, pt[0], abs_tol=5)) and (math.isclose(y, pt[1], abs_tol=5)):
+                    check = True
+                    #print(f"{pt} - ({x}, {y}) >>>>> {abs(x - pt[0])} - {abs(y - pt[1])} -- TOO CLOSE")
+                    break
+                else:
+                    #print(f"{pt} - ({x}, {y}) >>>>> {abs(x - pt[0])} - {abs(y - pt[1])}")
+                    continue
+
+            if check == False:
                 crowns.append(pt)
-                last = pt
-    cv2.imwrite('res.jpg', source)
-    return crowns, last
+                cv2.rectangle(img, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
+
+    cv2.imwrite('res.jpg', img)
+    return crowns
 
 
 
