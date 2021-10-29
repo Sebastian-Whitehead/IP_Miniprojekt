@@ -7,8 +7,8 @@ Group participants:
 - Sebastian Mikael Løwe Whitehead		swhite20@student.aau.dk		20204568
 
 This program takes a square 500x500 image of a 'King Dominos' attempts to provide the user with a valid score though the
-use of image processing. Hereby thresholding, template matching and object detection algorithms. For this program to
-best the following is highly suggested.
+use of image processing. Hereby thresholding, template matching and object detection algorithms. For this program to 
+preform best the following is highly suggested.
 
 Instructions:
 1. Place the assembled board onto a piece of paper and attempt to straighten the board as much as possible
