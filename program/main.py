@@ -21,6 +21,7 @@ cv2.imshow("Original Image", img)
 # splits image into individual tiles in a 5x5 grid
 def split_image(image):
     currentY = 0  # Y within the image
+    #i = 0
 
     roi_list = deque([])  # Initialize the output array
 
@@ -32,7 +33,11 @@ def split_image(image):
             currentROI = image[currentY:(image.shape[0] // 5) + currentY, currentX:(image.shape[1] // 5) + currentX]
 
             roi_list.append(currentROI)  # Append the cropped tile to a the output list
-            # cv2.imshow(f"test{i}", currentROI)
+
+            #i += 1
+            #cv2.imshow(f"test{i}", currentROI)
+
+
             currentX += img.shape[1] // 5  # Shift the column section to crop
         currentY += img.shape[0] // 5  # Shift the row section to crop
     return roi_list  # Return the ROI list
@@ -54,12 +59,13 @@ def mask_roi_list(img_list):
 
         masked = cv2.bitwise_and(currentImg, currentImg, mask=mask)  # Applies mask to current layer
         masked_roi_list.append(masked)  # Appends the masked image to the output list
-    '''
+
+        '''
         # Displays the Masked Image, The Current region of interest and the, mask
         cv2.imshow(f"Mask Applied{i}", masked)
         cv2.imshow(f"Current ROI - {i}", currentImg)
         cv2.imshow(f"Mask to apply{i}", mask)
-    '''
+        '''
 
     return masked_roi_list  # Returns a list of masked ROIs
 
@@ -206,6 +212,7 @@ def ignite_fire(mosaic, coordinates, current_id, target_tile):
 # Function for detecting crowns and dividing them into a 5x5 matrix
 def detect_crowns():
     img_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # Convert image to greyscale
+    cv2.imshow("greyscale",img_grey)
     crown_list = []  # Declare empty list for crown coordinates
 
     # template match using the standard crown template
@@ -214,7 +221,7 @@ def detect_crowns():
 
     # template match using the field crown template (fix because it didn't work with the other one for some reason)
     temp = cv2.imread('fieldCrownTest.jpg', 0)
-    crown_list = template_search(crown_list, img_grey, temp, 0.69)
+    crown_list = template_search(crown_list, img_grey, temp, 0.64)
 
     # Assign the according to location to a matrix of similar size and shape as the ID mosaic
     crown_matrix = np.zeros((5, 5), dtype="uint8")
