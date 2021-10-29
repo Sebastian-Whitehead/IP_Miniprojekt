@@ -35,5 +35,5 @@ counted incorrectly, manual checking of the score is advised but score errors wi
 \
 \
 Disclaimer:\
-Disclaimer: For safe utilization of elemental magic, remember the following guidelines. You can drink water but not fire. You can breathe air but not earth. You can walk on earth but not on
+For safe utilization of elemental magic, remember the following guidelines. You can drink water but not fire. You can breathe air but not earth. You can walk on earth but not on
 water (unless you have the right pair of boots or spell). You can do a lot of things with fire, but almost all of them are bad ideas.
