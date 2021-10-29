@@ -4,9 +4,6 @@ from random import *
 from collections import deque
 import math
 
-# TODO: README.MD
-# TODO: Short Report
-
 next_id = 10 # Next id variable for grassfire() function
 
 # Choose a random picture from the test set and load the selected image
